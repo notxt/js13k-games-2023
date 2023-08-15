@@ -4,16 +4,46 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-    <title>Rats</title>
+    <title>Rat's Life</title>
 
-    <link href="main.css" rel="stylesheet" />
+    <style>
+      :root {
+        --color-background: hsl(0 0% 15%);
+        --color-link: magenta;
+        --font-size-body: calc(1rem * (12 / 16));
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: var(--color-background);
+        font-family: "Helvetica", sans-serif;
+      }
+
+      main {
+        align-items: center;
+        display: flex;
+        height: 100vh;
+        justify-content: center;
+      }
+
+      a {
+        text-decoration: none;
+        font-size: var(--font-size-body);
+        color: var(--color-link);
+      }
+    </style>
   </head>
 
   <body>
     <main>
-      <p>Use left and right arrow keys to move the "rat"</p>
-      <canvas></canvas>
+      <nav>
+        <a href="src/index.html">go to game</a>
+      </nav>
     </main>
-    <script type="module" src="main.js"></script>
   </body>
 </html>
