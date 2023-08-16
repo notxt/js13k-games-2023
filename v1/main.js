@@ -12,27 +12,43 @@ const height = canvas.height;
 
 const ctx = canvas.getContext("2d");
 
-let velocity = 0;
-let acceleration = 0;
+let xAcceleration = 0;
+let xVelocity = 0;
 let drag = 0.5;
+
+let yAcceleration = 0;
+let yVelocity = 0;
+let gravity = 0.5;
+
 const drawRat = () => {
   const ratWidth = 10;
-  velocity += acceleration;
-  if (velocity > 0) velocity -= drag;
-  if (velocity < 0) velocity += drag;
+  xVelocity += xAcceleration;
+  if (xVelocity > 0) xVelocity -= drag;
+  if (xVelocity < 0) xVelocity += drag;
 
-  rat.x += velocity;
+  rat.x += xVelocity;
 
   if (rat.x < 0) {
     rat.x = 0;
-    velocity = 0;
+    xVelocity = 0;
     return;
   }
 
   if (rat.x > width) {
     rat.x = width - ratWidth;
-    velocity = 0;
+    xVelocity = 0;
     return;
+  }
+
+  yAcceleration -= gravity;
+  yVelocity += yAcceleration;
+
+  rat.y += yVelocity;
+
+  if (rat.y <= 0) {
+    rat.y = 0;
+    yVelocity = 0;
+    yAcceleration = 0;
   }
 
   ctx.fillStyle = ratColor;
@@ -48,10 +64,10 @@ const draw = () => {
 
   ctx.clearRect(0, 0, width, height);
 
-  ctx.fillText(`frames: ${frames}`, 0, 10);
-  ctx.fillText(`seconds: ${seconds}`, 0, 20);
-  ctx.fillText(`fps: ${fps}`, 0, 30);
-  ctx.fillText(`rat velocity: ${velocity}`, 0, 50);
+  const textXOffset = 2;
+  ctx.fillText(`FPS     ${fps}`, textXOffset, 10);
+  ctx.fillText(`X Speed ${xVelocity}`, textXOffset, 20);
+  ctx.fillText(`Y Speed ${yVelocity}`, textXOffset, 30);
 
   ctx.save();
   ctx.translate(0, height);
@@ -63,24 +79,31 @@ const draw = () => {
 requestAnimationFrame(() => draw());
 
 document.onkeydown = (event) => {
-  const key = event.key;
+  const code = event.code;
 
-  if (key === "ArrowRight") {
-    if (velocity < -1) {
-      acceleration = 1.5;
+  if (code === "ArrowRight") {
+    if (yVelocity !== 0) return;
+    if (xVelocity < -1) {
+      xAcceleration = 1.5;
       return;
     }
-    acceleration = 1;
+    xAcceleration = 1;
     return;
   }
 
-  if (key === "ArrowLeft") {
-    if (velocity > 1) {
-      acceleration = -1.5;
+  if (code === "ArrowLeft") {
+    if (yVelocity !== 0) return;
+    if (xVelocity > 1) {
+      xAcceleration = -1.5;
       return;
     }
-    acceleration = -1;
+    xAcceleration = -1;
     return;
+  }
+
+  if (code === "Space") {
+    if (yVelocity !== 0) return;
+    yAcceleration = 3;
   }
 };
 
@@ -88,6 +111,6 @@ document.onkeyup = (event) => {
   const key = event.key;
 
   if (key === "ArrowRight" || key === "ArrowLeft") {
-    acceleration = 0;
+    xAcceleration = 0;
   }
 };

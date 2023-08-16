@@ -29,3 +29,7 @@ main {
 main>p {
   font-size: 12px;
 }
+
+canvas {
+  border: 1px solid black;
+}
