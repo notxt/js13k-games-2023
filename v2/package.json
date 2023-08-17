@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "esbuild src/main.ts --bundle --outfile=dist/main.js --minify",
+    "build": "esbuild src/main.ts --bundle --outfile=dist/main.js --minify--sourcemap",
     "watch": "esbuild src/main.ts --bundle --outfile=dist/main.js --sourcemap --watch"
   },
   "devDependencies": {
