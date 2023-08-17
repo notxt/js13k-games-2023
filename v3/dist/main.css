@@ -1,0 +1,35 @@
+.scratch {
+  color: hsl(0 0% 50%)
+}
+
+:root {
+  --color-background: hsl(0 0% 50%)
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-background);
+  font-family: 'Helvetica', sans-serif;
+}
+
+main {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4vw;
+  row-gap: 2vw;
+}
+
+main>p {
+  font-size: 12px;
+}
+
+canvas {
+  border: 1px solid black;
+}
