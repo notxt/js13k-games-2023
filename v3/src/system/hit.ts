@@ -27,7 +27,7 @@ export const createHitSystem: CreateHitSystem = (rat: Rat) => {
         rat.p0.x <= i.p.x + i.b.width
       ) {
         rat.vel.y = 0;
-        rat.p.y = i.p.y + 1;
+        rat.p.y = i.p.y + i.b.height + 1;
       }
 
       if (
@@ -47,7 +47,7 @@ export const createHitSystem: CreateHitSystem = (rat: Rat) => {
         rat.p0.y <= i.p.y + i.b.height
       ) {
         rat.vel.x = 0;
-        rat.p.x = i.p.x - 1 - rat.b.width;
+        rat.p.x = i.p.x - rat.b.width - 1;
       }
     }
   };

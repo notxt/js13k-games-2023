@@ -31,18 +31,20 @@ export const createMoveSystem: CreateMoveSystem = () => {
 
   const move: Move = (): void => {
     for (const i of items) {
-      if (i.control.right) {
-        if (i.vel.x < 1) {
-          i.vel.x += i.acc.x * 1.5;
-        } else {
-          i.vel.x += i.acc.x;
+      if (i.vel.y === 0) {
+        if (i.control.right) {
+          if (i.vel.x < 1) {
+            i.vel.x += i.acc.x * 1.5;
+          } else {
+            i.vel.x += i.acc.x;
+          }
         }
-      }
-      if (i.control.left) {
-        if (i.vel.x > 1) {
-          i.vel.x -= i.acc.x * 1.5;
-        } else {
-          i.vel.x -= i.acc.x;
+        if (i.control.left) {
+          if (i.vel.x > 1) {
+            i.vel.x -= i.acc.x * 1.5;
+          } else {
+            i.vel.x -= i.acc.x;
+          }
         }
       }
 
@@ -52,8 +54,8 @@ export const createMoveSystem: CreateMoveSystem = () => {
       i.p0 = Object.assign({}, i.p);
       i.p.x += i.vel.x;
 
-      if (i.control.space) {
-        if (i.vel.y === 0) i.vel.y = 12;
+      if (i.control.space && i.vel.y === 0) {
+        i.vel.y = 12;
         i.control.space = false;
       }
 
