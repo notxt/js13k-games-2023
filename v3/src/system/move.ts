@@ -46,10 +46,10 @@ export const createMoveSystem: CreateMoveSystem = () => {
             i.vel.x -= i.acc.x;
           }
         }
-      }
 
-      if (i.vel.x > 0 && !i.control.right) i.vel.x -= DRAG;
-      if (i.vel.x < 0 && !i.control.left) i.vel.x += DRAG;
+        if (i.vel.x > 0 && !i.control.right) i.vel.x -= DRAG;
+        if (i.vel.x < 0 && !i.control.left) i.vel.x += DRAG;
+      }
 
       i.p0 = Object.assign({}, i.p);
       i.p.x += i.vel.x;

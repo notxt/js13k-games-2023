@@ -23,7 +23,7 @@ export const createHitSystem: CreateHitSystem = (rat: Rat) => {
       if (
         rat.p0.y > i.p.y &&
         rat.p.y <= i.p.y &&
-        i.p.x <= rat.p0.x &&
+        i.p.x <= rat.p0.x + rat.b.width &&
         rat.p0.x <= i.p.x + i.b.width
       ) {
         rat.vel.y = 0;
