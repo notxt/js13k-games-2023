@@ -1,14 +1,17 @@
 import { Box, Point } from "../type";
 
 export type DrawData = {
+  name: string;
   b: Box;
   color: string;
   p: Point;
 };
 
-type Draw = () => void;
+type Add = (item: DrawData) => void;
+type Draw = (t: number, frameCount: number) => void;
 
 type DrawSystem = {
+  add: Add;
   draw: Draw;
 };
 
@@ -31,8 +34,20 @@ export const createDrawSystem: CreateDrawSystem = ({
     items.push(item);
   };
 
-  const draw = (): void => {
+  const drawInfo = (t: number, frameCount: number) => {
+    const seconds = Math.round(t / 1000);
+    const fps = Math.round(frameCount / seconds);
+
+    const offset = 2;
+    ctx.font = "10px monospace";
+    ctx.fillText(`Seconds ${seconds}`, offset, 10);
+    ctx.fillText(`FPS     ${fps}`, offset, 20);
+  };
+
+  const draw = (t: number, frameCount: number): void => {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    drawInfo(t, frameCount);
 
     ctx.save();
     ctx.translate(0, canvasHeight);

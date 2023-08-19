@@ -5,7 +5,7 @@ import { MoveData } from "./system/move";
 
 const { round } = Math;
 
-type Rat = ControlItem & MoveData & DrawData;
+export type Rat = ControlItem & MoveData & DrawData;
 
 type CreateRat = (canvasWidth: number, canvasHeight: number) => Rat;
 
@@ -35,16 +35,18 @@ export const createRat: CreateRat = (canvasWidth, canvasHeight) => {
 
   const acc: Vector = {
     type: "vector",
-    x: 0,
+    x: 1,
     y: 0,
   };
 
   const rat: Rat = {
+    name: "rat",
     acc,
     b: box,
     color: "white",
     control,
     p: point,
+    p0: point,
     vel,
   };
 
