@@ -5,4 +5,7 @@
   "editor.tabSize": 2,
   "files.insertFinalNewline": true,
   "workbench.settings.editor": "json",
+  "cSpell.words": [
+    "cmps"
+  ],
 }
