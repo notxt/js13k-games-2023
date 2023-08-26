@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "build": "esbuild src/main.ts --outfile=dist/main.js --bundle --minify",
+    "watch": "esbuild src/main.ts --outfile=dist/main.js --bundle --watch --sourcemap"
+  },
+  "devDependencies": {
+    "@tsconfig/strictest": "^2.0.1",
+    "esbuild": "^0.19.2"
+  }
+}
