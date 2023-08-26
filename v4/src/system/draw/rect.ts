@@ -6,28 +6,20 @@ export type DrawRectData = {
   y: number;
 };
 
-type Add = (item: DrawRectData) => void;
-type Draw = () => void;
+type Draw = (rects: DrawRectData[]) => void;
 export type DrawRectSystem = {
-  add: Add;
   draw: Draw;
 };
 type CreateDrawRectSystem = (ctx: CanvasRenderingContext2D) => DrawRectSystem;
 export const createDrawRectSystem: CreateDrawRectSystem = (ctx) => {
-  const items: DrawRectData[] = [];
-
-  const add: Add = (item) => {
-    items.push(item);
-  };
-  const draw: Draw = () => {
-    for (const i of items) {
-      ctx.fillStyle = i.color;
-      ctx.fillRect(i.x, i.y, i.width, i.height);
+  const draw: Draw = (rects: DrawRectData[]) => {
+    for (const r of rects) {
+      ctx.fillStyle = r.color;
+      ctx.fillRect(r.x, r.y, r.width, r.height);
     }
   };
 
   const system: DrawRectSystem = {
-    add,
     draw,
   };
 

@@ -1,326 +1,336 @@
 "use strict";
 (() => {
-  // src/rat.ts
+  // src/entity/rat.ts
   var { round } = Math;
-  var createRat = ({
-    bottomBound,
-    canvasHeight,
-    canvasWidth,
-    control,
-    drawRect,
-    gravity,
-    leftBound,
-    move,
-    prevMove,
-    runLeft,
-    runRight
-  }) => {
+  var createRat = ({ canvasHeight, canvasWidth }) => {
     const x = round(canvasWidth / 2);
     const y = round(canvasHeight / 2);
-    const rat = {
+    const data = {
+      boundBottom: false,
+      boundLeft: false,
+      boundRight: false,
       color: "white",
+      ctlDown: false,
+      ctlJump: false,
       ctlLeft: false,
       ctlRight: false,
-      ctlSpace: false,
+      ctlUp: false,
       height: 10,
       name: "rat",
       width: 10,
       x,
-      xAcc: 1,
-      xAccRate: 0.1,
+      xAcc: 0,
+      xAccMax: 5,
+      xAccRate: 1,
       xPrev: x,
       xVel: 0,
-      xVelMax: 5,
+      xVelMax: 15,
       y,
       yPrev: y,
       yVel: 0
     };
-    prevMove.add(rat);
-    control.add(rat);
-    runLeft.add(rat);
-    runRight.add(rat);
-    gravity.add(rat);
-    move.add(rat);
-    bottomBound.addObj(rat);
-    leftBound.addObj(rat);
-    drawRect.add(rat);
+    return data;
   };
 
-  // src/room.ts
-  var createRoom = ({
-    bottomBound,
-    canvasHeight,
-    leftBound,
-    canvasWidth,
-    rightBound
-  }) => {
-    const floor = {
+  // src/system/ctl.ts
+  var createCtlSystem = () => {
+    const down = (data, pressed) => {
+      for (const d of data) {
+        d.ctlDown = pressed;
+      }
+    };
+    const jump = (data, pressed) => {
+      for (const d of data) {
+        d.ctlJump = pressed;
+      }
+    };
+    const left = (data, pressed) => {
+      for (const d of data) {
+        d.ctlLeft = pressed;
+      }
+    };
+    const right = (data, pressed) => {
+      for (const d of data) {
+        d.ctlRight = pressed;
+      }
+    };
+    const up = (data, pressed) => {
+      for (const d of data) {
+        d.ctlUp = pressed;
+      }
+    };
+    const system = {
+      down,
+      jump,
+      left,
+      right,
+      up
+    };
+    return system;
+  };
+
+  // src/system/draw/rect.ts
+  var createDrawRectSystem = (ctx2) => {
+    const draw2 = (rects2) => {
+      for (const r of rects2) {
+        ctx2.fillStyle = r.color;
+        ctx2.fillRect(r.x, r.y, r.width, r.height);
+      }
+    };
+    const system = {
+      draw: draw2
+    };
+    return system;
+  };
+
+  // src/system/prevMove.ts
+  var prevMoveFactory = () => {
+    const set = (data) => {
+      for (const d of data) {
+        d.xPrev = d.x;
+        d.yPrev = d.y;
+      }
+    };
+    const system = {
+      set
+    };
+    return system;
+  };
+
+  // src/system/move.ts
+  var createMoveSystem = () => {
+    const update = (items) => {
+      for (const i of items) {
+        i.x += i.xVel;
+        i.y += i.yVel;
+      }
+    };
+    const system = {
+      update
+    };
+    return system;
+  };
+
+  // src/system/gravity.ts
+  var GRAVITY = 1;
+  var createGravitySystem = () => {
+    const apply = (objs) => {
+      for (const o of objs) {
+        if (o.boundBottom || o.boundLeft || o.boundRight)
+          continue;
+        o.yVel -= GRAVITY;
+      }
+    };
+    const system = {
+      apply
+    };
+    return system;
+  };
+
+  // src/system/draw/bound.ts
+  var createDrawBoundSystem = (ctx2) => {
+    const bottom = (bounds) => {
+      for (const { x, y, width: width2 } of bounds) {
+        ctx2.beginPath();
+        ctx2.moveTo(x, y);
+        ctx2.lineTo(x + width2, y);
+        ctx2.stroke();
+      }
+    };
+    const left = (bounds) => {
+      for (const { x, y, height: height2 } of bounds) {
+        ctx2.beginPath();
+        ctx2.moveTo(x, y);
+        ctx2.lineTo(x, y + height2);
+        ctx2.stroke();
+      }
+    };
+    const right = (bounds) => {
+      for (const { x, y, height: height2 } of bounds) {
+        ctx2.beginPath();
+        ctx2.moveTo(x, y);
+        ctx2.lineTo(x, y + height2);
+        ctx2.stroke();
+      }
+    };
+    const system = {
+      bottom,
+      left,
+      right
+    };
+    return system;
+  };
+
+  // src/system/bound.ts
+  var createBoundSystem = () => {
+    const bottom = (moveData2, boundData) => {
+      for (const m of moveData2) {
+        m.boundBottom = false;
+        for (const b of boundData) {
+          if (m.yPrev >= b.y && m.y < b.y && m.xPrev >= b.x && m.xPrev <= b.x + b.width) {
+            m.boundBottom = true;
+            m.yVel = 0;
+            m.y = b.y;
+          }
+        }
+      }
+    };
+    const left = (objs, bounds) => {
+      for (const o of objs) {
+        o.boundLeft = false;
+        for (const b of bounds) {
+          if (o.xPrev >= b.x && o.x < b.x && o.yPrev >= b.y && o.yPrev <= b.y + b.height) {
+            o.xAcc = 0;
+            o.xVel = 0;
+            o.x = b.x;
+          }
+          if (o.x === b.x)
+            o.boundLeft = true;
+        }
+      }
+    };
+    const right = (objs, bounds) => {
+      for (const o of objs) {
+        o.boundRight = false;
+        for (const b of bounds) {
+          if (o.xPrev + o.width <= b.x && o.x + o.width > b.x && o.yPrev >= b.y && o.yPrev <= b.y + b.height) {
+            console.log("hit");
+            o.xAcc = 0;
+            o.xVel = 0;
+            o.x = b.x - o.width;
+          }
+          if (o.x + o.width === b.x)
+            o.boundRight = true;
+        }
+      }
+    };
+    return {
+      bottom,
+      left,
+      right
+    };
+  };
+
+  // src/system/moveCtl.ts
+  var moveCtlFactory = () => {
+    const down = (data) => {
+      for (const d of data) {
+        if (!d.ctlUp)
+          continue;
+        if (d.boundLeft || d.boundRight)
+          d.yVel = -2;
+      }
+    };
+    const left = (data) => {
+      for (const d of data) {
+        if (!d.ctlLeft && !d.ctlRight)
+          d.xAcc = 0;
+        if (!d.ctlLeft)
+          continue;
+        if (!d.boundBottom)
+          continue;
+        d.xAcc += d.xAccRate;
+        if (d.xAcc > d.xAccMax)
+          d.xAcc = d.xAccMax;
+        d.xVel -= d.xAcc;
+        if (d.xVel < -d.xVelMax)
+          d.xVel = -d.xVelMax;
+      }
+    };
+    const jump = (data) => {
+      for (const d of data) {
+        if (!d.ctlJump)
+          continue;
+        if (d.boundBottom)
+          d.yVel = 6;
+        if (d.boundLeft)
+          d.xVel = 6;
+        if (d.boundRight)
+          d.xVel = -6;
+      }
+    };
+    const right = (data) => {
+      for (const d of data) {
+        if (!d.ctlRight && !d.ctlLeft)
+          d.xAcc = 0;
+        if (!d.ctlRight)
+          continue;
+        if (!d.boundBottom)
+          continue;
+        d.xAcc += d.xAccRate;
+        if (d.xAcc > d.xAccMax)
+          d.xAcc = d.xAccMax;
+        d.xVel += d.xAcc;
+        if (d.xVel > d.xVelMax)
+          d.xVel = d.xVelMax;
+      }
+    };
+    const up = (data) => {
+      for (const d of data) {
+        if (d.boundLeft || d.boundRight) {
+          d.yVel = 0;
+          if (d.ctlUp)
+            d.yVel = 2;
+        }
+      }
+    };
+    const system = {
+      down,
+      jump,
+      left,
+      right,
+      up
+    };
+    return system;
+  };
+
+  // src/entity/room.ts
+  var createRoom = ({ canvasHeight, canvasWidth }) => {
+    const floor2 = {
       name: "floor",
       x: 0,
       width: canvasWidth,
       y: 0
     };
-    bottomBound.addBound(floor);
     const leftWall = {
       name: "leftWall",
       x: 0,
       y: 0,
       height: canvasHeight
     };
-    leftBound.addBound(leftWall);
     const rightWall = {
       name: "rightWall",
       x: canvasWidth,
       y: 0,
       height: canvasHeight
     };
-    rightBound.addBound(rightWall);
-    return;
-  };
-
-  // src/system/bound/bottom.ts
-  var createBottomBoundSystem = () => {
-    const objs = [];
-    const bounds = [];
-    const addObj = (obj) => {
-      objs.push(obj);
-    };
-    const addBound = (bound) => {
-      bounds.push(bound);
-    };
-    const test = () => {
-      for (const o of objs) {
-        for (const b of bounds) {
-          if (o.yPrev > b.y && o.y <= b.y && o.xPrev >= b.x && o.xPrev <= b.x + b.width) {
-            o.yVel = 0;
-            o.y = b.y + 1;
-          }
-        }
-      }
-    };
     return {
-      addObj,
-      addBound,
-      test
+      floor: floor2,
+      leftWall,
+      rightWall
     };
   };
 
-  // src/system/bound/left.ts
-  var createLeftBoundSystem = () => {
-    const objs = [];
-    const bounds = [];
-    const addObj = (obj) => {
-      objs.push(obj);
-    };
-    const addBound = (bound) => {
-      bounds.push(bound);
-    };
-    const test = () => {
-      for (const o of objs) {
-        for (const b of bounds) {
-          if (o.xPrev > b.x && o.x <= b.x && o.yPrev >= b.y && o.yPrev <= b.y + b.height) {
-            o.xVel = 0;
-            o.x = b.x + 1;
-          }
-        }
-      }
-    };
-    return {
-      addObj,
-      addBound,
-      test
-    };
-  };
-
-  // src/system/bound/right.ts
-  var createRightBoundSystem = () => {
-    const objs = [];
-    const bounds = [];
-    const addObj = (obj) => {
-      objs.push(obj);
-    };
-    const addBound = (bound) => {
-      bounds.push(bound);
-    };
-    const test = () => {
-      for (const o of objs) {
-        for (const b of bounds) {
-          if (o.p0.x < b.x && o.p.x >= b.x && o.p0.y >= b.y0 && o.p0.y <= b.y1) {
-            o.vel.x = 0;
-            o.p.x = b.x - 1;
-          }
-        }
-      }
-    };
-    return {
-      addObj,
-      addBound,
-      test
-    };
-  };
-
-  // src/system/control.ts
-  var createControlSystem = () => {
-    const items = [];
-    const add = (item) => {
-      items.push(item);
-    };
-    const left = (pressed) => {
-      for (const i of items) {
-        i.ctlLeft = pressed;
-      }
-    };
-    const right = (pressed) => {
-      for (const i of items) {
-        i.ctlRight = pressed;
-      }
-    };
-    const space = (pressed) => {
-      for (const i of items) {
-        i.ctlSpace = pressed;
-      }
-    };
-    return {
-      add,
-      left,
-      right,
-      space
-    };
-  };
-
-  // src/system/draw/rect.ts
-  var createDrawRectSystem = (ctx2) => {
-    const items = [];
-    const add = (item) => {
-      items.push(item);
-    };
-    const draw2 = () => {
-      for (const i of items) {
-        ctx2.fillStyle = i.color;
-        ctx2.fillRect(i.x, i.y, i.width, i.height);
+  // src/system/drag.ts
+  var { floor, ceil } = Math;
+  var DRAG = 1;
+  var dragFactory = () => {
+    const update = (data) => {
+      for (const d of data) {
+        if (!d.boundBottom)
+          continue;
+        if (d.xVel === 0)
+          continue;
+        if (d.xVel > 0)
+          d.xVel = floor(d.xVel - DRAG);
+        if (d.xVel < 0)
+          d.xVel = ceil(d.xVel + DRAG);
       }
     };
     const system = {
-      add,
-      draw: draw2
-    };
-    return system;
-  };
-
-  // src/system/control/runLeft.ts
-  var createRunLeftSystem = () => {
-    const items = [];
-    const add = (item) => {
-      items.push(item);
-    };
-    const update = () => {
-      for (const i of items) {
-        if (i.yVel !== 0)
-          continue;
-        if (!i.ctlLeft)
-          continue;
-        i.xVel -= i.xAcc;
-      }
-    };
-    const runSystem = {
-      add,
-      update
-    };
-    return runSystem;
-  };
-
-  // src/system/control/runRight.ts
-  var createRunRightSystem = () => {
-    const items = [];
-    const add = (item) => {
-      items.push(item);
-    };
-    const update = () => {
-      for (const i of items) {
-        if (i.yVel !== 0)
-          continue;
-        if (!i.ctlRight)
-          continue;
-        i.xVel += i.xAcc;
-      }
-    };
-    const runSystem = {
-      add,
-      update
-    };
-    return runSystem;
-  };
-
-  // src/system/move/setPrev.ts
-  var createPrevMoveSystem = () => {
-    const items = [];
-    const add = (item) => {
-      items.push(item);
-    };
-    const set = () => {
-      for (const i of items) {
-        i.xPrev = i.x;
-        i.yPrev = i.y;
-      }
-    };
-    const system = {
-      add,
-      set
-    };
-    return system;
-  };
-
-  // src/system/move/move.ts
-  var createMoveSystem = () => {
-    const items = [];
-    const add = (item) => {
-      items.push(item);
-    };
-    const update = () => {
-      for (const i of items) {
-        console.log(i.xVel);
-        i.x += i.xVel;
-        i.y += i.yVel;
-      }
-    };
-    const system = {
-      add,
       update
     };
     return system;
-  };
-
-  // src/system/physics/gravity.ts
-  var GRAVITY = 1;
-  var createGravitySystem = () => {
-    const items = [];
-    const add = (item) => {
-      items.push(item);
-    };
-    const apply = () => {
-      for (const i of items) {
-        i.yVel -= GRAVITY;
-      }
-    };
-    const system = {
-      add,
-      apply
-    };
-    return system;
-  };
-
-  // src/table.ts
-  var createTableFactory = ({ bottomBound, drawRect }) => ({ name, x, y, width: width2, height: height2 }) => {
-    const table = {
-      color: "black",
-      height: height2,
-      name,
-      width: width2,
-      x,
-      y
-    };
-    bottomBound.addBound(table);
-    drawRect.add(table);
   };
 
   // src/main.ts
@@ -332,103 +342,141 @@
     throw new Error("ctx is null");
   var width = canvas.width;
   var height = canvas.height;
-  var prevMoveSystem = createPrevMoveSystem();
-  var controlSystem = createControlSystem();
-  var runLeftSystem = createRunLeftSystem();
-  var runRightSystem = createRunRightSystem();
+  var prevMove = prevMoveFactory();
+  var ctlSystem = createCtlSystem();
+  var velCtrl = moveCtlFactory();
   var gravitySystem = createGravitySystem();
+  var drag = dragFactory();
   var moveSystem = createMoveSystem();
-  var bottomBoundSystem = createBottomBoundSystem();
-  var leftBoundSystem = createLeftBoundSystem();
-  var rightBoundSystem = createRightBoundSystem();
+  var boundSystem = createBoundSystem();
+  var drawBoundSystem = createDrawBoundSystem(ctx);
   var drawRectSystem = createDrawRectSystem(ctx);
+  var prevMoveData = [];
+  var ctlObjs = [];
+  var velCtrlData = [];
+  var gravityObjs = [];
+  var dragData = [];
+  var moveData = [];
+  var boundObjs = [];
+  var bottomBounds = [];
+  var leftBounds = [];
+  var rightBounds = [];
+  var rects = [];
   var createRatArg = {
-    bottomBound: bottomBoundSystem,
     canvasHeight: height,
-    canvasWidth: width,
-    control: controlSystem,
-    drawRect: drawRectSystem,
-    gravity: gravitySystem,
-    leftBound: leftBoundSystem,
-    move: moveSystem,
-    prevMove: prevMoveSystem,
-    runLeft: runLeftSystem,
-    runRight: runRightSystem
+    canvasWidth: width
   };
-  createRat(createRatArg);
+  var rat = createRat(createRatArg);
+  prevMoveData.push(rat);
+  ctlObjs.push(rat);
+  gravityObjs.push(rat);
+  dragData.push(rat);
+  velCtrlData.push(rat);
+  moveData.push(rat);
+  boundObjs.push(rat);
+  rects.push(rat);
   var createRoomArg = {
-    bottomBound: bottomBoundSystem,
     canvasHeight: height,
-    canvasWidth: width,
-    leftBound: leftBoundSystem,
-    rightBound: rightBoundSystem
+    canvasWidth: width
   };
-  createRoom(createRoomArg);
-  var createTableFactoryArg = {
-    bottomBound: bottomBoundSystem,
-    drawRect: drawRectSystem
-  };
-  var createTable = createTableFactory(createTableFactoryArg);
+  var room = createRoom(createRoomArg);
+  bottomBounds.push(room.floor);
+  leftBounds.push(room.leftWall);
+  rightBounds.push(room.rightWall);
   var table1 = {
-    height: 1,
     name: "table1",
     width: 50,
     x: 50,
     y: 50
   };
-  createTable(table1);
-  var drawInfo = (t, frameCount2) => {
+  bottomBounds.push(table1);
+  var drawInfo = (t, frameCount2, rat2) => {
     const seconds = Math.round(t / 1e3);
     const fps = Math.round(frameCount2 / seconds);
     const offset = 2;
     ctx.font = "10px monospace";
-    ctx.fillText(`FPS     ${fps}`, offset, 10);
+    ctx.fillText(`FPS ${fps}`, offset, 10);
+    ctx.fillText(`Acc ${rat2.xAcc}`, offset, 20);
+    ctx.fillText(`Vel ${rat2.xVel}`, offset, 30);
   };
   var frameCount = 0;
   var play = true;
-  var draw = () => {
+  var drawBounds = true;
+  var draw = (t) => {
     frameCount++;
-    const t = performance.now();
-    prevMoveSystem.set();
-    runLeftSystem.update();
-    runRightSystem.update();
-    gravitySystem.apply();
-    moveSystem.update();
-    bottomBoundSystem.test();
-    leftBoundSystem.test();
-    rightBoundSystem.test();
+    prevMove.set(prevMoveData);
+    velCtrl.down(velCtrlData);
+    velCtrl.jump(velCtrlData);
+    velCtrl.left(velCtrlData);
+    velCtrl.right(velCtrlData);
+    velCtrl.up(velCtrlData);
+    gravitySystem.apply(gravityObjs);
+    drag.update(dragData);
+    moveSystem.update(moveData);
+    boundSystem.bottom(boundObjs, bottomBounds);
+    boundSystem.left(boundObjs, leftBounds);
+    boundSystem.right(boundObjs, rightBounds);
     ctx.clearRect(0, 0, width, height);
-    drawInfo(t, frameCount);
+    drawInfo(t, frameCount, rat);
     ctx.save();
     ctx.translate(0, height);
     ctx.scale(1, -1);
-    drawRectSystem.draw();
+    drawRectSystem.draw(rects);
+    if (drawBounds) {
+      drawBoundSystem.bottom(bottomBounds);
+      drawBoundSystem.left(leftBounds);
+      drawBoundSystem.right(rightBounds);
+    }
     ctx.restore();
     if (play) {
-      requestAnimationFrame(() => draw());
+      requestAnimationFrame(draw);
     }
   };
-  requestAnimationFrame(() => draw());
-  var controlCodes = ["ArrowLeft", "ArrowRight", "Space", "KeyP"];
+  requestAnimationFrame(draw);
+  var controlCodes = [
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowUp",
+    "KeyB",
+    "KeyP",
+    "Space"
+  ];
   var isControlCode = (code) => controlCodes.includes(code);
   var keyPressFactory = (pressed) => (event) => {
     const code = event.code;
     if (!isControlCode(code))
       return;
     if (code === "KeyP") {
+      if (!pressed)
+        return;
       play = play ? false : true;
       return;
     }
-    if (code === "ArrowRight") {
-      controlSystem.right(pressed);
+    if (code === "KeyB") {
+      if (!pressed)
+        return;
+      drawBounds = drawBounds ? false : true;
+      return;
+    }
+    if (code === "ArrowDown") {
+      ctlSystem.down(ctlObjs, pressed);
       return;
     }
     if (code === "ArrowLeft") {
-      controlSystem.left(pressed);
+      ctlSystem.left(ctlObjs, pressed);
+      return;
+    }
+    if (code === "ArrowRight") {
+      ctlSystem.right(ctlObjs, pressed);
+      return;
+    }
+    if (code === "ArrowUp") {
+      ctlSystem.up(ctlObjs, pressed);
       return;
     }
     if (code === "Space") {
-      controlSystem.space(pressed);
+      ctlSystem.jump(ctlObjs, pressed);
       return;
     }
     throw new Error(`unknown control code ${code}`);

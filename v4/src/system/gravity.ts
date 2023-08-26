@@ -1,35 +1,30 @@
 const GRAVITY = 1;
 
 export type GravityData = {
+  boundBottom: boolean;
+  boundLeft: boolean;
+  boundRight: boolean;
   y: number;
   yVel: number;
 };
 
-type Add = (item: GravityData) => void;
-type Apply = () => void;
+type Apply = (objs: GravityData[]) => void;
 
 export type GravitySystem = {
-  add: Add;
   apply: Apply;
 };
 
 type CreateGravitySystem = () => GravitySystem;
 
 export const createGravitySystem: CreateGravitySystem = () => {
-  const items: GravityData[] = [];
-
-  const add: Add = (item) => {
-    items.push(item);
-  };
-
-  const apply: Apply = () => {
-    for (const i of items) {
-      i.yVel -= GRAVITY;
+  const apply: Apply = (objs) => {
+    for (const o of objs) {
+      if (o.boundBottom || o.boundLeft || o.boundRight) continue;
+      o.yVel -= GRAVITY;
     }
   };
 
   const system: GravitySystem = {
-    add,
     apply,
   };
 
