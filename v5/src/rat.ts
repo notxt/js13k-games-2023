@@ -1,5 +1,5 @@
-import { Round } from "../loop";
-import { DrawD } from "../system/draw";
+import { Round } from "./loop";
+import { DrawD } from "./draw";
 
 export type Rat = DrawD;
 

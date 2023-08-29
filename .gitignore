@@ -1,4 +1,6 @@
 .DS_Store
 *.zip
+build
+compiler.jar
 main.js.map
 node_modules

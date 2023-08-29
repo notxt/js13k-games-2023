@@ -1,10 +1,13 @@
 {
   "scripts": {
-    "build": "esbuild src/main.ts --outfile=dist/main.js --bundle --minify",
-    "watch": "esbuild src/main.ts --outfile=dist/main.js --bundle --watch --sourcemap"
+    "build": "esbuild src/main.ts --outfile=build/main.js --bundle",
+    "build2": "tsc",
+    "watch": "esbuild src/main.ts --outfile=build/main.js --bundle --watch --sourcemap",
+    "dist": "java -jar compiler.jar --js build/*.js --js_output_file dist/main.js --compilation_level ADVANCED_OPTIMIZATIONS --language_out ECMASCRIPT_2021"
   },
   "devDependencies": {
     "@tsconfig/strictest": "^2.0.1",
-    "esbuild": "^0.19.2"
+    "esbuild": "^0.19.2",
+    "typescript": "^5.2.2"
   }
 }

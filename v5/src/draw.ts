@@ -1,4 +1,4 @@
-import { Ctx } from "../ctx";
+import { Ctx } from "./ctx";
 
 const { PI, sin } = Math;
 

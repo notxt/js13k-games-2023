@@ -1,6 +1,6 @@
 import { ctxFactory } from "./ctx";
-import { ratFactory } from "./entity/rat";
-import { DrawD, drawFactory } from "./system/draw";
+import { ratFactory } from "./rat";
+import { DrawD, drawFactory } from "./draw";
 
 const { round } = Math;
 
