@@ -25,7 +25,7 @@ const rat: Rat = {
 };
 drawData.push(rat);
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 15; i++) {
   const layers = 5;
   const multiplier = floor(height / layers);
   const y = round(random() * layers) * multiplier;
@@ -33,21 +33,6 @@ for (let i = 0; i < 10; i++) {
   console.log(height, y, scale);
   const tree: Tree = {
     type: "leafyTree",
-    scale,
-    x: floor(random() * width),
-    y,
-  };
-  drawData.push(tree);
-}
-
-for (let i = 0; i < 10; i++) {
-  const layers = 5;
-  const multiplier = floor(height / layers);
-  const y = round(random() * layers) * multiplier;
-  const scale = y / height;
-  console.log(height, y, scale);
-  const tree: Tree = {
-    type: "pineTree",
     scale,
     x: floor(random() * width),
     y,
